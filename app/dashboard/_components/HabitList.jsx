@@ -1,11 +1,12 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, XCircle, Flame } from "lucide-react";
+import { CheckCircle2, XCircle, Flame, Sparkles, LoaderCircle } from "lucide-react";
 
 const HabitList = () => {
   const [habits, setHabits] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [savingId, setSavingId] = useState(null);
 
   const fetchHabits = async () => {
     setLoading(true);
@@ -25,17 +26,33 @@ const HabitList = () => {
   }, []);
 
   const markStatus = async (habitId, status) => {
-    // Optimistic update
+    setSavingId(habitId);
+    // Optimistic update for the button state only
     setHabits((prev) =>
       prev.map((h) => (h.id === habitId ? { ...h, todayStatus: status } : h))
     );
 
-    await fetch(`/api/habits/${habitId}/checkin`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    });
+    try {
+      const res = await fetch(`/api/habits/${habitId}/checkin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      const data = await res.json();
 
+      // Show the AI feedback immediately without waiting for a full refetch
+      if (data.aiFeedback) {
+        setHabits((prev) =>
+          prev.map((h) =>
+            h.id === habitId ? { ...h, todayFeedback: data.aiFeedback } : h
+          )
+        );
+      }
+    } catch {
+      // Non-fatal, the next fetchHabits() below will resync state
+    }
+
+    setSavingId(null);
     fetchHabits(); // refresh to get updated streak
   };
 
@@ -80,6 +97,7 @@ const HabitList = () => {
                 size="sm"
                 variant={habit.todayStatus === "done" ? "default" : "outline"}
                 onClick={() => markStatus(habit.id, "done")}
+                disabled={savingId === habit.id}
                 className="flex-1"
               >
                 <CheckCircle2 size={16} className="mr-1" />
@@ -89,12 +107,27 @@ const HabitList = () => {
                 size="sm"
                 variant={habit.todayStatus === "skipped" ? "default" : "outline"}
                 onClick={() => markStatus(habit.id, "skipped")}
+                disabled={savingId === habit.id}
                 className="flex-1"
               >
                 <XCircle size={16} className="mr-1" />
                 Skip
               </Button>
             </div>
+
+            {savingId === habit.id && (
+              <div className="flex items-center gap-2 text-xs text-gray-400 mt-1">
+                <LoaderCircle size={14} className="animate-spin" />
+                Getting AI feedback...
+              </div>
+            )}
+
+            {savingId !== habit.id && habit.todayFeedback && (
+              <div className="flex items-start gap-2 text-sm bg-white/50 border rounded p-2 mt-1">
+                <Sparkles size={16} className="text-purple-500 shrink-0 mt-0.5" />
+                <span>{habit.todayFeedback}</span>
+              </div>
+            )}
           </div>
         ))}
       </div>

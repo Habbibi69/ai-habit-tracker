@@ -50,6 +50,7 @@ export async function GET() {
         return {
           ...habit,
           todayStatus: todayCheckin[0]?.status ?? null,
+          todayFeedback: todayCheckin[0]?.aiFeedback ?? null,
           streak,
         };
       })

@@ -65,19 +65,19 @@ export const unitsRelations = relations(units, ({ many, one }) => ({
     lessons: many(lessons)
 }))
 
-export const challengesEnum = pgEnum("type", ["SELECT","ASSIST"])
+export const challengesEnum = pgEnum("type", ["SELECT", "ASSIST"])
 
-export const challenges = pgTable("challenges",{
+export const challenges = pgTable("challenges", {
     id: serial("id").primaryKey(),
-    lessonId: integer("lesson_id").references(()=>lessons.id, {onDelete:"cascade"}).notNull(),
+    lessonId: integer("lesson_id").references(() => lessons.id, { onDelete: "cascade" }).notNull(),
     type: challengesEnum("type").notNull(),
     duoQuestion: text("question").notNull(),
     order: integer("order").notNull()
 })
 
-export const challengesRelations = relations(challenges, ({one, many})=>({
-    lesson: one(lessons,{
-        fields:[challenges.lessonId],
+export const challengesRelations = relations(challenges, ({ one, many }) => ({
+    lesson: one(lessons, {
+        fields: [challenges.lessonId],
         references: [lessons.id]
     }),
     challengeOptions: many(challengesOptions),
@@ -85,33 +85,33 @@ export const challengesRelations = relations(challenges, ({one, many})=>({
 }))
 
 
-export const challengesOptions = pgTable("challenges_options",{
+export const challengesOptions = pgTable("challenges_options", {
     id: serial("id").primaryKey(),
-    challengeId: integer("challenge_id").references(()=>challenges.id, {onDelete:"cascade"}).notNull(),
+    challengeId: integer("challenge_id").references(() => challenges.id, { onDelete: "cascade" }).notNull(),
     text: text("text").notNull(),
     correct: boolean("correct").notNull(),
     imageSrc: text("image_src"),
     audioSrc: text("audio_src")
 })
 
-export const challengeOptionsRelations = relations(challengesOptions, ({one})=>({
-    challenge: one(challenges,{
-        fields:[challengesOptions.challengeId],
+export const challengeOptionsRelations = relations(challengesOptions, ({ one }) => ({
+    challenge: one(challenges, {
+        fields: [challengesOptions.challengeId],
         references: [challenges.id]
     }),
 }))
 
 
-export const challengeProgress = pgTable("challenge_progress",{
+export const challengeProgress = pgTable("challenge_progress", {
     id: serial("id").primaryKey(),
     userId: text("user_id").notNull(),
-    challengeId: integer("challenge_id").references(()=>challenges.id, {onDelete:"cascade"}).notNull(),
+    challengeId: integer("challenge_id").references(() => challenges.id, { onDelete: "cascade" }).notNull(),
     completed: boolean("completed").notNull().default(false)
 })
 
-export const challengeProgressRelations = relations(challengeProgress, ({one})=>({
-    challenge: one(challenges,{
-        fields:[challengeProgress.challengeId],
+export const challengeProgressRelations = relations(challengeProgress, ({ one }) => ({
+    challenge: one(challenges, {
+        fields: [challengeProgress.challengeId],
         references: [challenges.id]
     }),
 }))
@@ -123,9 +123,9 @@ export const lessons = pgTable("lessons", {
     order: integer("order").notNull()
 })
 
-export const lessonsRelations = relations(lessons, ({one, many})=>({
-    unit: one(units,{
-        fields:[lessons.unitId],
+export const lessonsRelations = relations(lessons, ({ one, many }) => ({
+    unit: one(units, {
+        fields: [lessons.unitId],
         references: [units.id]
     }),
     challenges: many(challenges)
@@ -154,4 +154,23 @@ export const Newsletter = pgTable('newsletter', {
     newEmail: varchar('newEmail'),
     newMessage: text('newMessage'),
     createdAt: varchar('createdAt')
+});
+export const Habit = pgTable('habit', {
+    id: serial('id').primaryKey(),
+    name: varchar('name').notNull(),
+    description: text('description'),
+    frequency: varchar('frequency').notNull(), // e.g. "daily", "3x_week"
+    createdBy: varchar('createdBy').notNull(), // Clerk user email/id
+    createdAt: varchar('createdAt'),
+});
+
+export const Checkin = pgTable('checkin', {
+    id: serial('id').primaryKey(),
+    habitId: integer('habitId').references(() => Habit.id, { onDelete: "cascade" }).notNull(),
+    date: varchar('date').notNull(), // store as 'YYYY-MM-DD'
+    status: varchar('status').notNull(), // "done" or "skipped"
+    note: text('note'),
+    aiFeedback: text('aiFeedback'),
+    createdBy: varchar('createdBy').notNull(),
+    createdAt: varchar('createdAt'),
 });

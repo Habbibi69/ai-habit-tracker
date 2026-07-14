@@ -22,7 +22,7 @@ export async function POST(request) {
     const base64Audio = Buffer.from(arrayBuffer).toString("base64");
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
     const result = await model.generateContent([
       "Transcribe the following audio accurately. Return only the transcribed text with no additional commentary.",

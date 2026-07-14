@@ -47,6 +47,15 @@ const Header = ({ logo }) => {
               Dashboard
             </li>
           </Link>
+          <Link href="/dashboard/insights">
+            <li
+              className={`hover:text-black hover:font-bold transition-all cursor-pointer ${
+                path == "/dashboard/insights" && "text-black font-bold"
+              }`}
+            >
+              Insights
+            </li>
+          </Link>
           <Link href="/dashboard/question">
             <li
               className={`hover:text-black hover:font-bold transition-all cursor-pointer ${
@@ -162,6 +171,15 @@ const Header = ({ logo }) => {
                   }`}
                 >
                   Dashboard
+                </li>
+              </Link>
+              <Link href="/dashboard/insights">
+                <li
+                  className={`hover:text-black hover:font-bold transition-all cursor-pointer ${
+                    path == "/dashboard/insights" && "text-black font-bold"
+                  }`}
+                >
+                  Insights
                 </li>
               </Link>
               <Link href="/dashboard/question">
